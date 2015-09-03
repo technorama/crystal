@@ -13,6 +13,16 @@ class Fiber
   @@last_fiber = nil
   @@stack_pool = [] of Void*
 
+  record DataKey, value
+  record DataRegistrationInfo, name, caller1
+  @@data_keys = Array(DataRegistrationInfo).new
+
+  def self.register_data_key(name : String) : DataKey
+    key = @@data_keys.length
+    @@data_keys << DataRegistrationInfo.new(name, caller[1])
+    DataKey.new key
+  end
+
   protected property :stack_top
   protected property :stack_bottom
   protected property :next_fiber
@@ -95,6 +105,22 @@ class Fiber
     else
       raise "Could not get the current fiber"
     end
+  end
+
+  private def data
+    @data ||= Array(Void*).new
+  end
+
+  def [] key : DataKey
+    data[key.value]
+  end
+
+  def []? key : DataKey
+    data[key.value]?
+  end
+
+  def []= key : DataKey, val : Void*
+    data[key.value] = val
   end
 
   protected def push_gc_roots
