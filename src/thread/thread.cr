@@ -23,6 +23,7 @@ class Thread(T, R)
   end
 
   def finalize
+LibC.printf "#{self}.finalize\n"
     LibPThread.detach(@th) unless @detached
   end
 
@@ -45,15 +46,25 @@ class Thread(T, R)
     if ret.is_a?(R) # Always true
       ret
     else
-      exit # unreachable, really
+      exit 242 # unreachable, really
     end
   end
 
   protected def start
     begin
-      @ret = @func.call(@arg)
+      Fiber.thread_init
+      fiber = Fiber.new(thread: self) do
+        @ret = @func.call(@arg)
+      end
+LibC.printf "Thread.start fiber.resume\n"
+      fiber.thread_run
+#      @ret = @func.call(@arg)
+LibC.printf "Thread.start fiber.end\n"
     rescue ex
+LibC.printf "Thread.start #{ex} #{ex.backtrace}\n"
       @exception = ex
+    ensure
+      Fiber.thread_cleanup
     end
   end
 end
