@@ -22,10 +22,11 @@ lib LibPThread
   type Cond = Int64[6]
   type CondAttr = Void*
 
-  fun create = pthread_create(thread : Thread*, attr : Void*, start : Void* ->, arg : Void*) : Int
+# defined in gc/boehm.cr
+#  fun create = pthread_create(thread : Thread*, attr : Void*, start : Void* ->, arg : Void*) : Int
+#  fun join = pthread_join(thread : Thread, value : Void**) : Int
+#  fun detach = pthread_detach(thread : Thread) : Int
   fun exit = pthread_exit(value : Void*)
-  fun join = pthread_join(thread : Thread, value : Void**) : Int
-  fun detach = pthread_detach(thread : Thread) : Int
 
   fun mutex_init = pthread_mutex_init(mutex : Mutex*, mutex_attr : MutexAttr*) : Int
   fun mutex_lock = pthread_mutex_lock(mutex : Mutex*) : Int

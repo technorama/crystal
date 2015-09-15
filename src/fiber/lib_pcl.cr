@@ -5,6 +5,7 @@ lib LibPcl
   type Coroutine = Void*
 
   fun co_thread_init : Int
+  fun co_thread_cleanup
   fun co_create(func : (Void* ->), data : Void*, stack : Void*, size : Int) : Coroutine
   fun co_call(cr : Coroutine)
   fun co_resume

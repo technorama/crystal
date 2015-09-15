@@ -6,6 +6,7 @@ lib LibGC
   alias Word = LibC::ULong
 
   fun init = GC_init
+  fun allow_register_threads = GC_allow_register_threads
   fun malloc = GC_malloc(size : SizeT) : Void*
   fun malloc_atomic = GC_malloc_atomic(size : SizeT) : Void*
   fun realloc = GC_realloc(ptr : Void*, size : SizeT) : Void*
@@ -62,6 +63,7 @@ module GC
   def self.init
     LibGC.set_handle_fork(1)
     LibGC.init
+    LibGC.allow_register_threads
   end
 
   def self.collect
