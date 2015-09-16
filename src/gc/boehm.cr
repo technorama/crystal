@@ -17,6 +17,7 @@ lib LibGC
   fun enable = GC_enable
   fun disable = GC_disable
   fun set_handle_fork = GC_set_handle_fork(value : Int)
+  fun get_stack_base = GC_get_stack_base() : Void*
 
   type Finalizer = Void*, Void* ->
   fun register_finalizer = GC_register_finalizer(obj : Void*, fn : Finalizer, cd : Void*, ofn : Finalizer*, ocd : Void**)

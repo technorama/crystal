@@ -44,11 +44,20 @@ lib LibC
   EWOULDBLOCK = 140
   EAGAIN      = 11
 
+  alias StdioFile = Void*
+
+  ifdef linux
+  elsif darwin
+    $stdout = __stdoutp : StdioFile
+    $stderr = __stderrp : StdioFile
+  end
+
   fun fcntl(fd : Int, cmd : FCNTL, ...) : Int
   fun getchar : Int
   fun putchar(c : Int) : Int
   fun puts(str : Char*) : Int
   fun printf(str : Char*, ...) : Int
+  fun setlinebuf(io : StdioFile)
   fun execl(path : Char*, arg0 : Char*, ...) : Int
   fun waitpid(pid : PidT, stat_loc : Int*, options : Int) : PidT
   fun open(path : Char*, oflag : Int, ...) : Int
@@ -61,6 +70,8 @@ lib LibC
   fun close(fd : Int) : Int
   fun isatty(fd : Int) : Int
 end
+
+LibC.setlinebuf LibC.stdout
 
 # The IO module is the basis for all input and output in Crystal.
 #

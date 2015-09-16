@@ -1,3 +1,6 @@
+STDOUT.sync = true
+STDERR.sync = true
+
 class A
 	def finalize
 		LibC.printf "#{self}.finalize\n"
@@ -14,14 +17,16 @@ end
 
 def sthread
 	Thread.new do
-#		A.new
-#		LibC.printf "hello\n"
+		A.new
+		LibC.printf "Thread.new before GC.collect\n"
 		3.times { GC.collect }
+		GC.malloc(23)
 #		raise "here" if rand(3) == 0
 #		LibC.printf "#{Fiber.current}\n"
-#		GC.collect
+		GC.collect
 # BUG: GC.collect returns Void which crashes Thread.join in `if is_a?`.  wtf
-#		"#{Fiber}"
+		"#{Fiber}-1"
+		nil
 	end
 end
 
@@ -29,7 +34,9 @@ threads = 10.times.map do
 	sthread
 end.to_a
 
-sleep 0.1
+#sleep 0.1
+LibC.printf "collecting after spawning threads\n"
+3.times { GC.collect }
 puts ""
 puts ""
 
@@ -37,10 +44,8 @@ success = 0
 success = threads.map { |th| thjoin th }.sum
 threads.clear
 
-sleep 0.1
+#sleep 0.1
 puts ""
 puts "last gc collect success=#{success}"
 
-10.times do
-	GC.collect
-end
+10.times { GC.collect }

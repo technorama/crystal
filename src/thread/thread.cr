@@ -9,21 +9,42 @@ class Thread(T, R)
     Thread(Nil, R).new(nil) { func.call }
   end
 
-  def initialize(arg : T, &func : T -> R)
+  def self.new_worker(&func : -> R)
+    Thread(Nil, R).new(nil, use_fiber: false) { func.call }
+  end
+
+# race condition
+  def self.mutex
+    @@mutex ||= Mutex.new
+  end
+
+  def self.threads
+    @@threads ||= begin
+      mutex.synchronize do
+        @@threads ||= Array(Thread(Nil, Nil)).new
+      end
+    end
+  end
+
+ def initialize(arg : T, @use_fiber = true, &func : T -> R)
     @func = func
     @arg = arg
     @detached = false
     ret = LibPThread.create(out @th, nil, ->(data) {
         (data as Thread(T, R)).start
       }, self as Void*)
-
     if ret != 0
       raise Errno.new("pthread_create")
     end
+
+#    threads = self.class.threads
+#self.class.mutex.synchronize do
+#    threads << self
+#end
   end
 
   def finalize
-LibC.printf "#{self}.finalize\n"
+#LibC.printf "#{self}.finalize\n" if ENV.has_key?("DEBUG")
     LibPThread.detach(@th) unless @detached
   end
 
@@ -51,20 +72,22 @@ LibC.printf "#{self}.finalize\n"
   end
 
   protected def start
+LibC.printf "#{self}.start begin\n" if ENV.has_key?("DEBUG")
+    Fiber.thread_init
+
     begin
-      Fiber.thread_init
-      fiber = Fiber.new(thread: self) do
-        @ret = @func.call(@arg)
-      end
-LibC.printf "Thread.start fiber.resume\n"
-      fiber.thread_run
-#      @ret = @func.call(@arg)
-LibC.printf "Thread.start fiber.end\n"
+      @fiber = Fiber.new self
+      @ret = @func.call(@arg)
     rescue ex
-LibC.printf "Thread.start #{ex} #{ex.backtrace}\n"
       @exception = ex
     ensure
+#LibC.printf "#{self}.start ensure (exiting)\n" if ENV.has_key?("DEBUG")
+      @fiber.try &.finished
+#LibC.printf "#{self}.start ensure after fiber.finished\n" if ENV.has_key?("DEBUG")
+      @fiber = nil
       Fiber.thread_cleanup
     end
   end
 end
+
+

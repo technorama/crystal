@@ -10,8 +10,10 @@ class Scheduler
 
   def self.reschedule
     if runnable = @@runnables.pop?
+#LibC.printf "Scheduler.reschedule resume #{runnable}\n"
       runnable.resume
     else
+#LibC.printf "Scheduler.reschedule resume loop_fiber\n"
       @@loop_fiber.resume
     end
   end
