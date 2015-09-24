@@ -16,7 +16,7 @@ class Scheduler
     end
   end
 
-  @@loop_fiber = Fiber.new { @@eb.run_loop }
+  @@loop_fiber = Fiber.new(name: "Scheduler.event_loop") { @@eb.run_loop }
 
   def self.after_fork
     @@eb.reinit

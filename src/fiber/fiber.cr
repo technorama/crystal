@@ -13,12 +13,13 @@ class Fiber
   @@last_fiber = nil
   @@stack_pool = [] of Void*
 
+  property name
   protected property :stack_top
   protected property :stack_bottom
   protected property :next_fiber
   protected property :prev_fiber
 
-  def initialize(&@proc)
+  def initialize(@name = nil : String?, &@proc)
     @stack = Fiber.allocate_stack
     @stack_top = @stack_bottom = @stack + STACK_SIZE
     @cr = LibPcl.co_create(->(fiber) { (fiber as Fiber).run }, self as Void*, @stack, STACK_SIZE)
@@ -33,7 +34,7 @@ class Fiber
     end
   end
 
-  def initialize
+  def initialize @name = nil : String?
     @cr = LibPcl.co_current
     @proc = ->{}
     @stack = Pointer(Void).null
@@ -123,7 +124,7 @@ class Fiber
   end
 
   LibPcl.co_thread_init
-  @@root = new
+  @@root = new(name: "main")
 
   def self.root
     @@root
