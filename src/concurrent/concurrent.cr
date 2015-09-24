@@ -13,8 +13,8 @@ def sleep(time : Time::Span)
   sleep(time.total_seconds)
 end
 
-macro spawn
-  %fiber = Fiber.new do
+macro spawn(name = nil)
+  %fiber = Fiber.new({{ name }}) do
     begin
       {{ yield }}
     rescue %ex
