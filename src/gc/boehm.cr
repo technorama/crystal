@@ -32,6 +32,15 @@ lib LibGC
   fun get_push_other_roots = GC_get_push_other_roots : ->
 
   fun push_all_eager = GC_push_all_eager(bottom : Void*, top : Void*)
+  fun push_all_stack = GC_push_all_stack(bottom : Void*, top : Void*)
+
+  # Incomplete on IA64.  This should really be imported from a C header.
+  struct StackBase
+    base : Void*
+  end
+
+  fun get_stack_base = GC_get_stack_base(StackBase*)
+  fun register_altstack = GC_register_altstack(stack : Void*, ssize : SizeT, astack : Void*, asize : SizeT)
 
   $stackbottom = GC_stackbottom : Void*
 end
@@ -96,5 +105,10 @@ module GC
   def self.add_root(object : Reference)
     roots = $roots ||= [] of Pointer(Void)
     roots << Pointer(Void).new(object.object_id)
+  end
+
+  def self.stack_base
+    LibGC.get_stack_base out sb
+    sb
   end
 end

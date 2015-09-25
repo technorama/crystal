@@ -18,7 +18,18 @@ class Fiber
   protected property :next_fiber
   protected property :prev_fiber
 
+  def self.thread_init
+    if LibPcl.co_thread_init != 0
+      raise Errno.new "co_thread_init"
+    end
+  end
+
+  def self.thread_cleanup
+    LibPcl.co_thread_cleanup
+  end
+
   def initialize(&@proc)
+    @thread = nil
     @stack = Fiber.allocate_stack
     @stack_top = @stack_bottom = @stack + STACK_SIZE
     @cr = LibPcl.co_create(->(fiber) { (fiber as Fiber).run }, self as Void*, @stack, STACK_SIZE)
@@ -33,12 +44,11 @@ class Fiber
     end
   end
 
-  def initialize
+  def initialize @thread = nil : Thread?, @stack_bottom = LibGC.stackbottom
     @cr = LibPcl.co_current
     @proc = ->{}
     @stack = Pointer(Void).null
     @stack_top = get_stack_top
-    @stack_bottom = LibGC.stackbottom
     LibPcl.co_set_data(@cr, self as Void*)
 
     @@first_fiber = @@last_fiber = self
@@ -87,7 +97,13 @@ class Fiber
   def resume
     Fiber.current.stack_top = get_stack_top
 
-    LibGC.stackbottom = @stack_bottom
+    thread = @thread
+    sfiber = thread ? thread.fiber.not_nil! : Fiber.root
+    ssize = sfiber.stack_bottom - sfiber.stack_top
+    astack = @stack
+    asize = @stack.null? ? 0 : STACK_SIZE
+    LibGC.register_altstack(sfiber.stack_top, ssize, astack, asize)
+
     LibPcl.co_call(@cr)
   end
 

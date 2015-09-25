@@ -5,16 +5,27 @@ class Thread(T, R)
   # Don't use this class, it is used internally by the event scheduler.
   # Use spawn and channels instead.
 
+  # :nodoc:
+  getter :fiber
+
   def self.new(&func : -> R)
     Thread(Nil, R).new(nil) { func.call }
   end
 
   def initialize(arg : T, &func : T -> R)
+    @fiber = nil
     @func = func
     @arg = arg
     @detached = false
     ret = LibPThread.create(out @th, nil, ->(data) {
-        (data as Thread(T, R)).start
+        ifdef linux
+# BUG: incorrect.  need a portable way to get the stack bottom
+          stack_bottom = get_stack_top
+        elsif darwin
+          tself = LibPThread.self
+          stack_bottom = LibPThread.get_stackaddr_np(tself) + LibPThread.get_stacksize_np(tself)
+        end
+        (data as Thread(T, R)).start stack_bottom
       }, self as Void*)
 
     if ret != 0
@@ -49,11 +60,16 @@ class Thread(T, R)
     end
   end
 
-  protected def start
+  protected def start stack_bottom
+    Fiber.thread_init
     begin
+      @fiber = Fiber.new(self, stack_bottom)
       @ret = @func.call(@arg)
     rescue ex
       @exception = ex
+    ensure
+      @fiber = nil
+      Fiber.thread_cleanup
     end
   end
 end
