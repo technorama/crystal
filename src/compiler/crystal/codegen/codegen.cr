@@ -1624,6 +1624,11 @@ module Crystal
       type.passed_by_value? ? value : load value
     end
 
+    def to_lhs_atomic(value, type)
+      type.passed_by_value? ? value : load_atomic value
+#      type.passed_by_value? ? value : load value
+    end
+
     def to_rhs(value, type)
       type.passed_by_value? ? load value : value
     end

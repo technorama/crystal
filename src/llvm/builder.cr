@@ -65,6 +65,15 @@ class LLVM::Builder
     Value.new LibLLVM.build_load(self, ptr, name)
   end
 
+# BUG: just testing.  remove
+  def load_atomic(ptr, name = "")
+    Value.new LibLLVM.build_load_atomic(self, ptr, nil, name)
+  end
+
+  def load_atomic(ptr, ordering = nil, name = "")
+    Value.new LibLLVM.build_load_atomic(self, ptr, ordering, name)
+  end
+
   def malloc(type, name = "")
     Value.new LibLLVM.build_malloc(self, type, name)
   end
@@ -112,6 +121,11 @@ class LLVM::Builder
       Value.new LibLLVM.build_{{name.id}}(self, op, lhs, rhs, name)
     end
   {% end %}
+
+# BUG: needs memory order or make fixed in libllvm
+  def cmpxchg(ptr, cmpmp, nval, name = "")
+    Value.new LibLLVM.build_cmpxchg(self, cmpval, nval, name)
+  end
 
   def not(value, name = "")
     Value.new LibLLVM.build_not(self, value, name)

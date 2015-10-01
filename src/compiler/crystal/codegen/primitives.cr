@@ -27,6 +27,8 @@ class Crystal::CodeGenVisitor
               codegen_primitive_pointer_set node, target_def, call_args
             when :pointer_get
               codegen_primitive_pointer_get node, target_def, call_args
+            when :pointer_get_atomic
+              codegen_primitive_pointer_get_atomic node, target_def, call_args
             when :pointer_address
               codegen_primitive_pointer_address node, target_def, call_args
             when :pointer_new
@@ -276,6 +278,11 @@ class Crystal::CodeGenVisitor
   def codegen_primitive_pointer_get(node, target_def, call_args)
     type = context.type.remove_typedef as PointerInstanceType
     to_lhs call_args[0], type.element_type
+  end
+
+  def codegen_primitive_pointer_get_atomic(node, target_def, call_args)
+    type = context.type.remove_typedef as PointerInstanceType
+    to_lhs_atomic call_args[0], type.element_type
   end
 
   def codegen_primitive_pointer_address(node, target_def, call_args)

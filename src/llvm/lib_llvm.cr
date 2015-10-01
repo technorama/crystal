@@ -52,6 +52,7 @@ lib LibLLVM
   fun build_extract_value = LLVMBuildExtractValue(builder : BuilderRef, agg_val : ValueRef, index : UInt32, name : UInt8*) : ValueRef
   fun build_fadd = LLVMBuildFAdd(builder : BuilderRef, lhs : ValueRef, rhs : ValueRef, name : UInt8*) : ValueRef
   fun build_fcmp = LLVMBuildFCmp(builder : BuilderRef, op : LLVM::RealPredicate, lhs : ValueRef, rhs : ValueRef, name : UInt8*) : ValueRef
+  fun build_cmpxchg = LLVMBuildFCmp(builder : BuilderRef, ptr : ValueRef, cmpval : ValueRef, nval : ValueRef, name : UInt8*) : ValueRef
   fun build_fdiv = LLVMBuildFDiv(builder : BuilderRef, lhs : ValueRef, rhs : ValueRef, name : UInt8*) : ValueRef
   fun build_fmul = LLVMBuildFMul(builder : BuilderRef, lhs : ValueRef, rhs : ValueRef, name : UInt8*) : ValueRef
   fun build_fp2si = LLVMBuildFPToSI(builder : BuilderRef, val : ValueRef, dest_ty : TypeRef, name : UInt8*) : ValueRef
@@ -67,6 +68,8 @@ lib LibLLVM
   fun build_invoke = LLVMBuildInvoke(builder : BuilderRef, fn : ValueRef, args : ValueRef*, num_args : UInt32, then : BasicBlockRef, catch : BasicBlockRef, name : UInt8*) : ValueRef
   fun build_landing_pad = LLVMBuildLandingPad(builder : BuilderRef, ty : TypeRef, pers_fn : ValueRef, num_clauses : UInt32, name : UInt8*) : ValueRef
   fun build_load = LLVMBuildLoad(builder : BuilderRef, ptr : ValueRef, name : UInt8*) : ValueRef
+# BUG: ordering needs the correct type
+  fun build_load_atomic = LLVMBuildLoad(builder : BuilderRef, ptr : ValueRef, ordering : ValueRef, name : UInt8*) : ValueRef
   fun build_lshr = LLVMBuildLShr(builder : BuilderRef, lhs : ValueRef, rhs : ValueRef, name : UInt8*) : ValueRef
   fun build_malloc = LLVMBuildMalloc(builder : BuilderRef, type : TypeRef, name : UInt8*) : ValueRef
   fun build_mul = LLVMBuildMul(builder : BuilderRef, lhs : ValueRef, rhs : ValueRef, name : UInt8*) : ValueRef

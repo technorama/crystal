@@ -85,11 +85,13 @@ module Crystal
       pointer.metaclass.add_def Def.new("malloc", [Arg.new("size", type: uint64)], Primitive.new(:pointer_malloc))
       pointer.metaclass.add_def Def.new("new", [Arg.new("address", restriction: Path.global("UInt64"))], Primitive.new(:pointer_new))
       pointer.add_def Def.new("value", body: Primitive.new(:pointer_get))
+      pointer.add_def Def.new("value_atomic", body: Primitive.new(:pointer_get_atomic))
       pointer.add_def Def.new("value=", [Arg.new("value", restriction: Path.new("T"))], Primitive.new(:pointer_set))
       pointer.add_def Def.new("address", body: Primitive.new(:pointer_address))
       pointer.add_def Def.new("realloc", [Arg.new("size", type: uint64)], Primitive.new(:pointer_realloc))
       pointer.add_def Def.new("+", [Arg.new("offset", type: int64)], Primitive.new(:pointer_add))
       pointer.add_def Def.new("-", [Arg.new("other", restriction: Self.new)], Primitive.new(:pointer_diff))
+#      pointer.add_def Def.new("compare_and_swap", [Arg.new("other", restriction: Self.new)], Primitive.new(:pointer_diff))
     end
 
     def define_symbol_primitives

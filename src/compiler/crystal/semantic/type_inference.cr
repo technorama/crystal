@@ -2616,7 +2616,7 @@ module Crystal
         visit_pointer_malloc node
       when :pointer_set
         visit_pointer_set node
-      when :pointer_get
+      when :pointer_get, :pointer_get_atomic
         visit_pointer_get node
       when :pointer_address
         node.type = @mod.uint64
